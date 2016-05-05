@@ -1,3 +1,4 @@
+#include <opencv2/core/version.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 
@@ -6,6 +7,7 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+    cout << "Using OpenCV version " << CV_VERSION << "." << endl;
     VideoCapture cap(0); // open /dev/video0 (bcm2835-v4l2) for reading
 
     if ( !cap.isOpened() )  // if not success, exit program
