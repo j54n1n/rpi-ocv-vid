@@ -5,7 +5,7 @@
 #include <sstream>
 #include <cstdlib>
 
-#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/opencv.hpp>
 
 template<typename CvProcessing>
 class App {
