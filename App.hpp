@@ -22,7 +22,7 @@ public:
     using namespace std;
     using namespace cv;
     this->winName = winName;
-    if(!cvProcessing.initalize(videoDevice)) {
+    if(!cvProcessing.initalize(videoDevice, this->winName)) {
       stringstream ss;
       ss << "Cannot open video device '" << videoDevice << "'!";
       quit(ss.str().c_str(), 1);
@@ -36,7 +36,7 @@ public:
    */
   int run(int delayMillis = 0) {
     using namespace cv;
-    if(!cvProcessing.process(this->winName)) {
+    if(!cvProcessing.process()) {
       quit("Cannot process video capture!", 2);
     }
     return waitKey(delayMillis);
@@ -48,7 +48,7 @@ public:
   void quit(const char* msg = 0, int retVal = 0) {
     using namespace std;
     using namespace cv;
-    destroyWindow(this->winName);
+    destroyWindow(winName);
     if(retVal == 0) {
       cout << (msg == 0 ? "" : msg) << endl;
     } else {

@@ -2,38 +2,21 @@
 #define _VIDEO_PROCESSING_HPP
 
 #include <opencv2/opencv.hpp>
+#include <string>
 
 class VideoProcessing {
   cv::VideoCapture videoCapture;
+  cv::Mat frame;
+  cv::Mat frameFisheyeComp;
+  std::string winName;
 
-  void compensateFisheye(const char* nm, cv::Mat& frame) {
+  cv::Mat cameraMatrix;
+  cv::Mat distCoeffs;
+
+  void compensateFisheye() {
     using namespace cv;
-    Mat cameraMatrix = Mat::zeros(3, 3, CV_32FC1);
-    //Mat cameraMatrix = (Mat_<double>(3,3) << 1000, 0, 320, 0, 1000, 240, 0, 0, 1);
-    CvMat cvCameraMatrix = cameraMatrix;
-    cvSetReal2D(&cvCameraMatrix, 0, 0, 469.96);
-    cvSetReal2D(&cvCameraMatrix, 0, 1, 0.0);
-    cvSetReal2D(&cvCameraMatrix, 0, 2, 640.0);
-    cvSetReal2D(&cvCameraMatrix, 1, 0, 0.0);
-    cvSetReal2D(&cvCameraMatrix, 1, 1, 467.68);
-    cvSetReal2D(&cvCameraMatrix, 1, 2, 360);
-    cvSetReal2D(&cvCameraMatrix, 2, 0, 0.0);
-    cvSetReal2D(&cvCameraMatrix, 2, 1, 0.0);
-    cvSetReal2D(&cvCameraMatrix, 2, 2, 1.0);
-    Mat distCoeffs = Mat::zeros(1, 5, CV_32FC1);
-    //Mat distCoeffs = (Mat_<double>(5,1) << 0.1, 0.01, -0.001, 0, 0);
-    CvMat cvDistCoeffs = distCoeffs;
-    cvSetReal2D(&cvDistCoeffs, 0, 0, -0.18957);
-    cvSetReal2D(&cvDistCoeffs, 0, 1, 0.037319);
-    cvSetReal2D(&cvDistCoeffs, 0, 2, 0.0);
-    cvSetReal2D(&cvDistCoeffs, 0, 3, 0.0);
-    cvSetReal2D(&cvDistCoeffs, 0, 4, -0.00337);
-    Mat undistortedCameraMatrix = getOptimalNewCameraMatrix(
-        cameraMatrix, distCoeffs, frame.size(), 1
-    );
-    Mat newFrame;
-    undistort(frame, newFrame, cameraMatrix, distCoeffs);
-    imshow(nm, newFrame);
+    undistort(frame, frameFisheyeComp, cameraMatrix, distCoeffs);
+    imshow(winName.c_str(), frameFisheyeComp);
   }
 
 public:
@@ -42,8 +25,24 @@ public:
    * \param videoDevice the video capture device number.
    * \returns true if the device is opened, otherwise false.
    */
-  bool initalize(int videoDevice) {
+  bool initalize(int videoDevice, const char* winName) {
     using namespace cv;
+    using namespace std;
+
+    cameraMatrix = (Mat_<float>(3,3) <<
+        3.5923395873000760e+02f , 0.f                     , 3.1991569564808998e+02f,
+        0.f                     , 3.5852312812934173e+02f , 2.4185953087165657e+02f,
+        0.f                     , 0.f                     , 1.f
+    );
+    distCoeffs = (Mat_<float>(1,5) <<
+        -3.2709008830682418e-01f ,
+        9.3376576049175472e-02f  ,
+        -5.1681305956487802e-03f ,
+        -1.0776793003378243e-03f ,
+        -1.2467313109229949e-02f
+    );
+
+    this->winName = string(winName);
     videoCapture = VideoCapture(videoDevice);
     return videoCapture.isOpened();
   }
@@ -53,13 +52,12 @@ public:
    * \param winName the window name.
    * \returns true if the operation was successful, otherwise false.
    */
-  bool process(const char* winName) {
+  bool process() {
     using namespace cv;
-    Mat frame;
     bool success = videoCapture.read(frame);
     if(success) {
-      imshow(winName, frame);
-      //compensateFisheye(winName, frame);
+      //imshow(winName.c_str(), frame);
+      compensateFisheye();
     }
     return success;
   }
