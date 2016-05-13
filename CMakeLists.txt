@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 2.8)
+
 project(rpi-ocv-vid)
-set(COMPILE_DEFINITIONS -Wall)
-#find_package(OpenCV REQUIRED)
+
 find_package(OpenCV HINTS /opt/opencv3.1.0)
-add_executable(rpi-ocv-vid rpi-ocv-vid.cpp)
-target_link_libraries(rpi-ocv-vid ${OpenCV_LIBS})
+if(NOT OpenCV_FOUND)
+  find_package(OpenCV 2.4.9 REQUIRED)
+endif()
+
+set(COMPILE_DEFINITIONS -Wall)
+add_executable(${PROJECT_NAME} ${PROJECT_NAME}.cpp)
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
