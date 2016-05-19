@@ -40,6 +40,8 @@ int main(int argc, char* argv[]) {
 	int fpsDiff = 0;
 	time_t timeStart;
 	time_t timeStop;
+	clock_t clockProcessingStart;
+	clock_t clockProcessingStop;
 	
 	Point pointMin;
 	Point pointMax;
@@ -76,7 +78,7 @@ int main(int argc, char* argv[]) {
 	
 	imageMotionMask = Mat(frame.size(), CV_8U);
 		
-	waitKey(waitMs);
+	waitKey(1);
 	
 	cout << "Using OpenCV version " << CV_VERSION << "." << endl;
 	cout << "Press 'q' to quit." << endl << endl;
@@ -85,6 +87,8 @@ int main(int argc, char* argv[]) {
 	time(&timeStart);
 	
 	while(true) {
+		clockProcessingStart = clock();
+		
 		videoCapture >> frame;
 		if(frame.empty()) {
 			break;
@@ -142,17 +146,22 @@ int main(int argc, char* argv[]) {
 		rectangle(imageMotionMask, pointMin, pointMax, Scalar(128));
 		imshow(windowNameMotion, imageMotionMask);
 		
+		clockProcessingStop = clock();
+		int processMs = (clockProcessingStop - clockProcessingStart) / (CLOCKS_PER_SEC / 1000);
+		
 		//Calculate fps.
 		++counter;
 		if((counter % 100) == 0) {
 			time(&timeStop);
 			sec = (float)difftime(timeStop, timeStart);
 			fps = counter / sec;
-			cout << fps << "fps" << endl;
+			cout << "Processing done in " << processMs << "ms @" <<
+					fps << "fps" << endl;
 		}
 		
 		//Ceck quit key press.
-		int key = waitKey(waitMs);
+		int key = waitKey(
+				((waitMs - processMs) > 0) ? waitMs - processMs : 1);
 		if(key == 'q') {
 			break;
 		}
